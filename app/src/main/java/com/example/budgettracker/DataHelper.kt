@@ -55,34 +55,28 @@ class DataHelper(context: Context) : SQLiteOpenHelper(context, "Transactions.db"
         return rowsUpdated > 0
     }
 
-    fun getAllTransactions(): List<Transaction> {
+    fun getAllTransactions(): ArrayList<Transaction> {
         val MyDatabase = readableDatabase
-        val transactions = mutableListOf<Transaction>()
+        val transactions =  ArrayList<Transaction>()
 
         val cursor = MyDatabase.rawQuery("SELECT * FROM transactions", null)
 
-        try {
-            while (cursor.moveToNext()) {
-                val idIndex = cursor.getColumnIndex("id")
-                val labelIndex = cursor.getColumnIndex("label")
-                val amountIndex = cursor.getColumnIndex("amount")
-                val descriptionIndex = cursor.getColumnIndex("description")
+        while (cursor.moveToNext()) {
+            val idIndex = cursor.getColumnIndex("id")
+            val labelIndex = cursor.getColumnIndex("label")
+            val amountIndex = cursor.getColumnIndex("amount")
+            val descriptionIndex = cursor.getColumnIndex("description")
 
-                if (idIndex >= 0 && labelIndex >= 0 && amountIndex >= 0 && descriptionIndex >= 0) {
-                    val id = cursor.getInt(idIndex)
-                    val label = cursor.getString(labelIndex)
-                    val amount = cursor.getDouble(amountIndex)
-                    val description = cursor.getString(descriptionIndex)
+            val id = cursor.getInt(idIndex)
+            val label = cursor.getString(labelIndex)
+            val amount = cursor.getDouble(amountIndex)
+            val description = cursor.getString(descriptionIndex)
 
-                    val transaction = Transaction(id, label, amount, description)
-                    transactions.add(transaction)
-                } else {
+            val transaction = Transaction(id, label, amount, description)
+            transactions.add(transaction)
 
-                }
-            }
-        } finally {
-            cursor.close()
         }
+        cursor.close()
 
         return transactions
     }

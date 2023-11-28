@@ -41,7 +41,7 @@ class TransactionAdapter(private var transactions: List<Transaction>) : Recycler
     }
 
     fun setData(transaction: List<Transaction>){
-        this.transactions = transactions
+        this.transactions = transaction
         notifyDataSetChanged()
     }
 }

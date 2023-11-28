@@ -61,9 +61,8 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private fun insert(transaction: Transaction){
         val db = DataHelper(this)
-            db.insertData(transaction)
-            finish()
-
+        db.insertData(transaction)
+        finish()
     }
 
     

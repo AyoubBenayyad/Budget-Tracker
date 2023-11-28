@@ -73,8 +73,6 @@ class MainActivity : AppCompatActivity() {
             transactions = dataHelper.getAllTransactions()
             updateDashboard()
             transactionAdapter.setData(transactions)
-
-
     }
 
     private fun updateDashboard(){
@@ -114,14 +112,13 @@ class MainActivity : AppCompatActivity() {
     private fun deleteTransaction(transaction: Transaction){
         deletedTransaction = transaction
         oldTransactions = transactions
+        dataHelper.removeData(transaction.id)
 
-           dataHelper.removeData(transaction.id)
+        transactions = transactions.filter { it.id != transaction.id }
 
-            transactions = transactions.filter { it.id != transaction.id }
-
-            updateDashboard()
-            transactionAdapter.setData(transactions)
-            showSnackbar()
+        updateDashboard()
+        transactionAdapter.setData(transactions)
+        showSnackbar()
 
     }
 
