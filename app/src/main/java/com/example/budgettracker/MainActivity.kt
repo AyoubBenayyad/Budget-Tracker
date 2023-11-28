@@ -3,31 +3,36 @@ package com.example.budgettracker
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var transactions: ArrayList<Transaction>
+    private lateinit var deletedTransaction: Transaction
+    private lateinit var transactions: List<Transaction>
     private lateinit var transactionAdapter:TransactionAdapter
     private lateinit var linearlayoutManager:LinearLayoutManager
+    private lateinit var dataHelper: DataHelper
+    private lateinit var oldTransactions : List<Transaction>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        transactions = arrayListOf(
-        Transaction("Weekend budget",400.00),
-        Transaction("Bananas", -4.00),
-        Transaction("Gasoline", -40.90),
-        Transaction("Breakfast",  -9.99),
-        Transaction("Water bottles", -4.00),
-        Transaction("Suncream",-8.00),
-        Transaction("Car Park", -15.00)
-        )
+        transactions = arrayListOf()
 
         transactionAdapter = TransactionAdapter(transactions)
         linearlayoutManager = LinearLayoutManager(this)
+
+        dataHelper = DataHelper(this)
+
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerview)
 
@@ -35,7 +40,23 @@ class MainActivity : AppCompatActivity() {
             adapter = transactionAdapter
             layoutManager=linearlayoutManager
         }
-        updateDashboard()
+
+        //swipe to remove
+        val itemTouchHelper = object : ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT){
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                deleteTransaction(transactions[viewHolder.adapterPosition])
+            }
+        }
+
+        val swipeHelper = ItemTouchHelper(itemTouchHelper)
+        swipeHelper.attachToRecyclerView(recyclerView)
 
         val addBtn: FloatingActionButton= findViewById(R.id.addBtn)
 
@@ -43,6 +64,16 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, AddTransactionActivity::class.java)
             startActivity(intent)
         }
+
+    }
+
+    private fun fetchall(){
+            var tr = Transaction(0,"adam",100.0,"desc")
+            dataHelper.insertData(tr)
+            transactions = dataHelper.getAllTransactions()
+            updateDashboard()
+            transactionAdapter.setData(transactions)
+
 
     }
 
@@ -56,5 +87,46 @@ class MainActivity : AppCompatActivity() {
         balance.text = "$ %.2f".format(totalAmount)
         budget.text = "$ %.2f".format(budgetAmount)
         expense.text = "$ %.2f".format(expenseAmount)
+    }
+
+    private fun undoDelete(){
+            dataHelper.insertData(deletedTransaction)
+            transactions = oldTransactions
+
+
+            transactionAdapter.setData(transactions)
+            updateDashboard()
+
+    }
+
+
+    private fun showSnackbar(){
+        val view = findViewById<View>(R.id.coordinator)
+        val snackbar = Snackbar.make(view, "Transaction deleted!",Snackbar.LENGTH_LONG)
+        snackbar.setAction("Undo"){
+            undoDelete()
+        }
+            .setActionTextColor(ContextCompat.getColor(this, R.color.red))
+            .setTextColor(ContextCompat.getColor(this, R.color.white))
+            .show()
+    }
+
+    private fun deleteTransaction(transaction: Transaction){
+        deletedTransaction = transaction
+        oldTransactions = transactions
+
+           dataHelper.removeData(transaction.id)
+
+            transactions = transactions.filter { it.id != transaction.id }
+
+            updateDashboard()
+            transactionAdapter.setData(transactions)
+            showSnackbar()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fetchall()
     }
 }

@@ -7,6 +7,8 @@ import android.widget.ImageButton
 import androidx.core.widget.addTextChangedListener
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class AddTransactionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +33,8 @@ class AddTransactionActivity : AppCompatActivity() {
             else if(amount == null)
                 amountLayout.error = "Please enter a valid amount"
             else {
-
+                val transaction1  = Transaction(0,label,amount,description)
+                insert(transaction1)
             }
         }
         val amountInput:TextInputEditText= findViewById(R.id.amountInput)
@@ -53,6 +56,13 @@ class AddTransactionActivity : AppCompatActivity() {
         closeBtn.setOnClickListener {
             finish()
         }
+
+    }
+
+    private fun insert(transaction: Transaction){
+        val db = DataHelper(this)
+            db.insertData(transaction)
+            finish()
 
     }
 
