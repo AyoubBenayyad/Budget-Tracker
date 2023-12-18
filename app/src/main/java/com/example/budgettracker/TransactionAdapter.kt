@@ -32,7 +32,11 @@ class TransactionAdapter(private var transactions: List<Transaction>) : Recycler
         }
 
         holder.label.text = transaction.label
-
+        holder.itemView.setOnClickListener {
+            val intent = Intent(context, DetailedActivity::class.java)
+            intent.putExtra("transaction", transaction)
+            context.startActivity(intent)
+        }
 
     }
 

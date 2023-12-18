@@ -33,7 +33,9 @@ class MainActivity : AppCompatActivity() {
 
         dataHelper = DataHelper(this)
 
-
+        transactions = dataHelper.getAllTransactions()
+        transactionAdapter.setData(transactions)
+        updateDashboard()
         val recyclerView: RecyclerView = findViewById(R.id.recyclerview)
 
         recyclerView.apply {
@@ -68,11 +70,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun fetchall(){
-            var tr = Transaction(0,"adam",100.0,"desc")
-            dataHelper.insertData(tr)
+
             transactions = dataHelper.getAllTransactions()
-            updateDashboard()
             transactionAdapter.setData(transactions)
+            updateDashboard()
+
     }
 
     private fun updateDashboard(){
